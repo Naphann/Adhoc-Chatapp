@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        
+    },
+    "exclude": [
+        "/typings",
+        "/node_modules"
+    ]
+}
