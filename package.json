@@ -4,7 +4,9 @@
   "description": "",
   "main": "chat-core.js",
   "dependencies": {
+    "bootstrap": "^3.3.7",
     "express": "^4.14.0",
+    "jquery": "^3.1.1",
     "socket.io": "^1.5.1"
   },
   "devDependencies": {},
