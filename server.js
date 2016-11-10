@@ -1,6 +1,6 @@
 var RCVPORT = 44444;
 var SENDPORT = 55555;
-var HOST = '192.168.1.105';
+var HOST;
 var broadcastAddr;
 var selfKey;
 var selfDisplay;
@@ -15,32 +15,33 @@ var forwardedBroadcast; // map for broadcast message "fromKey toKey" => "seqKey"
 var forwardAnnouncement; // map for announcement msg incase we want to broadcast to others
 
 server.on('listening', function () {
-   require('dns').lookup(require('os').hostname(), function (err, add, fam) {
-        let address = add;
-        HOST = add;
-        console.log('UDP Server listening on ' + address.address + ":" + address.port);
-    })
+    console.log(`UDP Server listening on ${HOST}:${RCVPORT}`);
 });
 
 server.on('message', function (message, remote) {
     // split case to do each function
     // TODO: write this function
-
+    message = `${message}`;
     let title = message.split(':')[0];
     let body = message.split(':').slice
-    switch(title) {
+    switch (title) {
         case 'announce':
-            receiveAnnouncement()
+            receiveAnnouncement(body);
             break;
         case 'reply':
+            receiveReply(body);
             break;
         case 'message':
+            receiveMsg(body);
             break;
         case 'ackmessage':
+            receiveMsgAck(body);
             break;
         case 'broadcastmessage':
+            receiveBroadcastMsg(body);
             break;
         case 'broadcastack':
+            receiveBroadcastAck(body);
             break;
 
         default:
@@ -50,7 +51,23 @@ server.on('message', function (message, remote) {
 
 });
 
-server.bind(RCVPORT, HOST);
+
+// main program
+initialize();
+
+
+// function section
+function initialize() {
+    require('dns').lookup(require('os').hostname(), (err, add, fam) => {
+        HOST = add;
+        server.bind(RCVPORT, HOST);
+    });
+}
+
+function generateKey() {
+    // this function generate key from hostname and random string 'asdfjkl;'
+    selfKey = require('os').hostname();
+}
 
 function announceSelf() {
     if (!HOST) {
@@ -159,3 +176,7 @@ function receiveBroadcastMsg(msg) {
     // when receive message check if the msg is aim for us or should be forward
     // and remember to not forward more than once
 }
+
+function receiveReply(body) {};
+function receiveMsgAck(body) {};
+function receiveBroadcastAck(body) {};
