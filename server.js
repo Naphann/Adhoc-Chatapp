@@ -23,7 +23,7 @@ server.on('message', function (message, remote) {
     // TODO: write this function
     message = `${message}`;
     let title = message.split(':')[0];
-    let body = message.split(':').slice
+    let body = message.split(':').slice(1).join(':');
     switch (title) {
         case 'announce':
             receiveAnnouncement(body);
