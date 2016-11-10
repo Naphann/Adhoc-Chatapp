@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Home chat</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      .h1, h1 {
+        text-align: center;
+      }
+      h3 {
+        text-align: center;
+      }
+      form {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+  <div class="row">
+    <div class="col-xs-6 col-xs-offset-3">
+    <br>
+    <h1>ADHOC CHAT</h1>
+    <h3>input your name</h3>
+    <form id="m" action="/getUserlist" method="POST">
+      <input id="username" name="username">
+      <button class="btn btn-primary" type="submit">OK</button>
+      <!-- <a href="#" onclick="document.getElementById('m').submit();">inginging</a> -->
+    </form>
+    </div>
+    </div>
+    <script src="/jquery.min.js" type="text/javascript"></script>
+  </body>
+</html>

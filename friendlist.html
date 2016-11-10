@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Friendslist</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      .h1, h1 {
+        text-align: center;
+      }
+      h3 {
+        text-align: center;
+      }
+      form {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+  <div class="row">
+    <div class="col-xs-6 col-xs-offset-3">
+    <br>
+    <h1>NearBy</h1>
+    <div id="list"></div>
+    </div>
+    </div>
+    <script src="/socket/socket.io.js"></script>
+    <script src="/jquery.min.js" type="text/javascript"></script>
+    <script>
+      var socket = io();
+      var user="";
+      var id="";
+      socket.on('getUsername',function(name){
+        user=name;
+      });
+      socket.on('sendfriendslist',function(friendslist){
+          for(var i = 0 ; i < friendslist.length ;i++){
+          if(friendslist[i] != user){
+            var a = document.createElement("a");
+            var newItem = document.createElement("form");
+            var input = document.createElement("input");
+            var ulist = document.getElementById("list");
+            var click = 'document.getElementById(\''+friendslist[i]+'\').submit();'
+            a.textContent = friendslist[i];
+            a.setAttribute('href', '#');
+            a.setAttribute('onclick', click);
+            input.setAttribute('name', 'friend');
+            input.setAttribute('value', friendslist[i]);
+            input.setAttribute('type', 'hidden');
+            newItem.appendChild(a);
+            newItem.appendChild(input);
+            newItem.setAttribute('id',friendslist[i]);
+            newItem.setAttribute('action','/chatroom/'+friendslist[i]);
+            newItem.setAttribute('method','POST');
+            newItem.setAttribute('target', '_blank');
+            ulist.appendChild(newItem);
+
+          }
+          console.log(friendslist);
+        }
+      });
+
+    </script>>
+  </body>
+</html>

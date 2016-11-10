@@ -4,10 +4,12 @@
   "description": "",
   "main": "chat-core.js",
   "dependencies": {
+    "body-parser": "^1.15.2",
     "bootstrap": "^3.3.7",
     "express": "^4.14.0",
     "jquery": "^3.1.1",
-    "socket.io": "^1.5.1"
+    "socket.io": "^1.5.1",
+    "udp-discovery": "0.0.3"
   },
   "devDependencies": {},
   "scripts": {
