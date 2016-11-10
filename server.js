@@ -60,9 +60,10 @@ initialize();
 function initialize() {
     require('dns').lookup(require('os').hostname(), (err, add, fam) => {
         HOST = add;
-        server.bind(RCVPORT, HOST);
+        server.bind(RCVPORT);
     });
     generateKey();
+    setBroadcastAddress();
 }
 
 function generateKey() {
@@ -190,4 +191,9 @@ function receiveMsgAck(body) {
 }
 function receiveBroadcastAck(body) {
     // same as above function but ack for sendMsgViaBroadcasting
+}
+
+function setBroadcastAddress() {
+    // this function sets broadcast address using ip | (inverse(subnetmask))
+
 }
