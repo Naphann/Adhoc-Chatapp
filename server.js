@@ -4,7 +4,7 @@ var HOST;
 var broadcastAddr;
 var selfKey;
 var selfDisplay;
-var keymap; // map from [ip] => [keyOfParticipants]
+var keymap; // map from [ip] => [keyOfParticipants] **can be subjected to changed to whatever you like
 
 var dgram = require('dgram');
 var server = dgram.createSocket('udp4');
@@ -47,7 +47,7 @@ server.on('message', function (message, remote) {
         default:
             console.error('invalid message');
     }
-    console.log(remote.address + ':' + remote.port + ' - ' + message);
+    console.log(`received: ${remote.address + ':' + remote.port + ' - ' + message}`);
 
 });
 
@@ -62,10 +62,11 @@ function initialize() {
         HOST = add;
         server.bind(RCVPORT, HOST);
     });
+    generateKey();
 }
 
 function generateKey() {
-    // this function generate key from hostname and random string 'asdfjkl;'
+    // this function generate key from hostname and random string 'asdfjkl;' or some other random string
     selfKey = require('os').hostname();
 }
 
@@ -177,6 +178,16 @@ function receiveBroadcastMsg(msg) {
     // and remember to not forward more than once
 }
 
-function receiveReply(body) {};
-function receiveMsgAck(body) {};
-function receiveBroadcastAck(body) {};
+function receiveReply(body) {
+    // when receive reply from other nodes save it in the keymap or something
+    // then store it and show to user in the discover page
+
+}
+
+function receiveMsgAck(body) {
+    // ack message when send using sendMsgViaIP should flag some global var or
+    // using event to denote that message has arrived
+}
+function receiveBroadcastAck(body) {
+    // same as above function but ack for sendMsgViaBroadcasting
+}
