@@ -27,16 +27,26 @@
       var socket = io();
       var user="";
       var peer= window.location.pathname;
-      peer = peer.substring(10);
+      // peer = peer.substring(10);
+      window.onload = function(){
+        socket.emit('reqGetUsername',"");
+        socket.emit('reqGetpeer',"");
+      }
       socket.on('getUsername',function(name){
         user=name;
         console.log("user "+user);
       });
-      // socket.on('sendChattingpeer',function(name){
-      //   peer=name;
-      //   console.log("peer "+peer);
-      // });
-      console.log("peer "+peer);
+      socket.on('sendChattingpeer',function(name){
+        peer=name;
+        console.log("peer "+peer);
+        socket.emit('reqWaitingmsg',peer);
+      });
+
+      socket.on('successMsg',function(){
+        $('#messages').append($('<li>').text($('#m').val()));
+        $('#m').val('');
+      })
+      //console.log("peer "+peer);
       $('form').submit(function(){
         var message={
             sender:user,
@@ -44,17 +54,19 @@
             content:$('#m').val(),
       };
       socket.emit('msgfromclient', message);
-      $('#m').val('');
+      //$('#messages').append($('<li>').text($('#m').val()));
+      //$('#m').val('');
       return false;
       });
       // socket.on('waiting message', function(msg){
       //     $('#messages').append($('<li>').text(msg));
       // });
       socket.on('msgtoClient', function(msg){
+        console.log(msg);
         console.log(msg.sender);
-        if(msg.sender == peer){
+        // if(msg.sender == peer){
           $('#messages').append($('<li>').text(msg.content));
-        }
+        // }
       });
 
       socket.on('waitingmsgtoClient', function(msg){

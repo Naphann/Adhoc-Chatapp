@@ -31,13 +31,28 @@
       var socket = io();
       var user="";
       var id="";
+      window.onload = function(){
+        socket.emit('reqFriendslist',"");
+      }
       socket.on('getUsername',function(name){
         user=name;
       });
+      socket.on('notiOn',function(name){
+        var form = document.getElementById(name).getElementsByClassName('glyphicon glyphicon-bell hidden');
+        form.setAttribute('class','glyphicon glyphicon-bell');
+        console.log("notiOn");
+      })
+      socket.on('notiOff',function(name){
+        var form = document.getElementById(name).getElementsByClassName('glyphicon glyphicon-bell');
+        form.setAttribute('class','glyphicon glyphicon-bell hidden');
+        console.log("notioff");
+
+      })
       socket.on('sendfriendslist',function(friendslist){
           for(var i = 0 ; i < friendslist.length ;i++){
           if(friendslist[i] != user){
             var a = document.createElement("a");
+            var noti = document.createElement("span");
             var newItem = document.createElement("form");
             var input = document.createElement("input");
             var ulist = document.getElementById("list");
@@ -48,11 +63,13 @@
             input.setAttribute('name', 'friend');
             input.setAttribute('value', friendslist[i]);
             input.setAttribute('type', 'hidden');
+            noti.setAttribute('class','glyphicon glyphicon-bell hidden');
             newItem.appendChild(a);
             newItem.appendChild(input);
+            newItem.appendChild(noti);
             newItem.setAttribute('id',friendslist[i]);
-            newItem.setAttribute('action','/chatroom/'+friendslist[i]);
-            newItem.setAttribute('method','POST');
+            newItem.setAttribute('action','/chatroom');
+            newItem.setAttribute('method','GET');
             newItem.setAttribute('target', '_blank');
             ulist.appendChild(newItem);
 
