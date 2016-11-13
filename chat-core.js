@@ -27,7 +27,7 @@
 	const bodyParser = require('body-parser')
 
 	var io = require('socket.io')(http);
-	var peers=["mimi1","mimi2","mimi3"];
+	var peers=[];
 	var me="";
 	var wmessage = {
 	}
