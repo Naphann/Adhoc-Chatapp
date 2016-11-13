@@ -6,20 +6,48 @@
     <title>Friendslist</title>
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <style>
+      body {
+        background-color: #FCEBF3;
+      }
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font: 13px Helvetica, Arial; }
-      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form { background: #003366; padding: 3px; position: fixed; bottom: 0; width: 100%; }
       form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
-      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages li { padding: 5px 10px; }
-      #messages li:nth-child(odd) { background: #eee; }
+      form button { width: 9%; background: #C7E1F9; border: none; padding: 10px; font-family: "Comic Sans MS";
+      font-size: 20px; border-radius: 20px;
+    }
+      #messages { list-style-type: none; margin-top:5px ;margin-bottom:5px;  padding: 5px; }
+      p {
+        font-family: "Comic Sans MS";
+        padding: 10px;
+        border-radius: 20px;
+        font-size: 20px;
+      }
+      #peer {
+        clear: both;
+        display: inline-block;
+        float: left;
+        background-color: #F092BC;
+      }
+      #me {
+        clear: both;
+        display: inline-block;
+        float: right;
+        background-color: #F0DF92;
+      }
+      #peer-list {
+        padding-left: 20px;
+      }
+      #me-list {
+        padding-right: 20px;
+      }
+
     </style>
   </head>
   <body>
   <ul id="messages"></ul>
     <form action="">
-      <input id="m" autocomplete="off" /><button>Send</button>
+      <input id="m" autocomplete="off" /><button><strong>Send</strong></button>
     </form>
     <script src="/socket/socket.io.js"></script>
     <script src="/jquery.min.js" type="text/javascript"></script>
@@ -46,7 +74,14 @@
 
       socket.on('successMsg',function(){
         clearTimeout(timer);
-        $('#messages').append($('<li>').text($('#m').val()));
+        var input = document.createElement("p");
+        var llist = document.createElement("li");
+        var ulist = document.getElementById("messages");
+        input.textContent = $('#m').val();
+        input.setAttribute('id', 'me');
+        llist.setAttribute('id', 'me-list');
+        llist.appendChild(input);
+        ulist.appendChild(llist);
         $('#m').val('');
       })
       //console.log("peer "+peer);
@@ -69,14 +104,29 @@
         console.log(msg);
         console.log(msg.sender);
         // if(msg.sender == peer){
-          $('#messages').append($('<li>').text(msg.content));
+        var input = document.createElement("p");
+        var llist = document.createElement("li");
+        var ulist = document.getElementById("messages");
+        input.textContent = msg.content;
+        input.setAttribute('id', 'peer');
+        llist.setAttribute('id', 'peer-list');
+        llist.appendChild(input);
+        ulist.appendChild(llist);
         // }
       });
 
       socket.on('waitingmsgtoClient', function(msg){
         if(msg.sender==peer){
-          console.log(msg.content);
-          $('#messages').append($('<li>').text(msg.content));
+        console.log(msg.content);
+        var input = document.createElement("p");
+        var temp = document.createElement("h1");
+        var llist = document.createElement("li");
+        var ulist = document.getElementById("messages");
+        input.textContent = msg.content;
+        input.setAttribute('id', 'peer');
+        llist.setAttribute('id', 'peer-list');
+        llist.appendChild(input);
+        ulist.appendChild(llist);
         }
         
       });
@@ -87,6 +137,12 @@
 
       function showerror(){
         console.log("cannot send the message");
+        socket.emit('peerdisconnect',peer);
+        var ulist = document.getElementById("messages");
+        var llist = document.createElement("div");
+        llist.setAttribute('class', 'alert alert-danger');
+        llist.textContent = "Your friend has already disconnected. pls reload your Friendslist page";
+        ulist.appendChild(llist);
       }
 
     </script>>

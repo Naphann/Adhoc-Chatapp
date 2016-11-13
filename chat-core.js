@@ -27,11 +27,19 @@
 	const bodyParser = require('body-parser')
 
 	var io = require('socket.io')(http);
-	var peers=[];
+	var peers=["mimi1","mimi2","mimi3"];
 	var me="";
 	var wmessage = {
 	}
 	var peer="";
+
+	app.use( bodyParser.json() );       // to support JSON-encoded bodies
+	app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+	  extended: true
+	})); 
+	app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css/'));
+	app.use('/socket', express.static(__dirname + '/node_modules/socket.io-client/'));
+	app.use('/', express.static(__dirname + '/node_modules/jquery/dist/'));
 
 	// PART SERVER CONNECT SERVER---------------------------------------------------------------------------------------------
 	server.on('listening', function () {
@@ -394,14 +402,6 @@
 
 
 	// PART SERVER CONNECT CLIENT ---------------------------------------------------------------------------------------------------
-	app.use( bodyParser.json() );       // to support JSON-encoded bodies
-	app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-	  extended: true
-	})); 
-	app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css/'));
-	app.use('/socket', express.static(__dirname + '/node_modules/socket.io-client/'));
-	app.use('/', express.static(__dirname + '/node_modules/jquery/dist/'));
-
 
 	app.get('/', (req, res) => {
 	    res.sendFile(__dirname + '/home.html');
@@ -466,6 +466,14 @@
 				delete wmessage[peer];
 				io.to(keyMapsocketID['list']).emit('notiOff',peer);
 			}
+		});
+		socket.on('peerdisconnect',function(peer){
+			var index = peers.indexOf(peer);
+			if (index >= 0) {
+  			peers.splice( index, 1 );
+}
+    		delete keymap[peer];
+    		socket.emit('removepeerlist',peer);
 		});
 
 
