@@ -129,6 +129,7 @@
 	function sendMsgViaIP(destKey,destIP, msg) {
 	    // this function is for chat msg
 	    // will send via broadcast if not receive ack in 1s
+	    console.log("send via ip "+ msg +" " + destKey);
 	    var seqnum = Math.floor((Math.random() * 1000000) + 1);
 	    console.log("sendMsgViaIP");
 	    console.log(msg+" "+destKey+" "+destIP);
@@ -141,22 +142,27 @@
 		    }
 			      
 		});
+		var temp = ""+selfKey+destKey;
+		forwardedMsg[temp]=seqnum;
 
 	}
 
 	function sendMsgViaBroadcasting(desKey,msg) {
 	    // this is also chat message
 	    // will return error to UI if not receive ack in 3s
+	    console.log("send broadcast "+ msg +" " + desKey);
 	    var seqnum = Math.floor((Math.random() * 1000000) + 1);
 	    client.setBroadcast(true);
 	    
-        let message = Buffer.from(`broadcastmessage: ${destKey} ${selfKey} ${seqnum} ${msg}`);
+        let message = Buffer.from(`broadcastmessage: ${desKey} ${selfKey} ${seqnum} ${msg}`);
         client.send(message, RCVPORT, broadcastAddr, (err) => {
             if (err) {
                 console.error(`error occured while broadcasting:\n${err}`);
             }
 
         });
+        var temp = ""+selfKey+desKey;
+		forwardedBroadcast[temp]=seqnum;
 	  
 	}
 
@@ -275,17 +281,23 @@
 	    {
 	    	content = content+msg[i]+ " ";
 	    }
+	    var message={
+	    	sender: senderkey,
+	    	content: content
+	    }
 	    var temp = ""+senderkey+deskey;
-	    if(deskey != selfKey && (forwardedBroadcast[temp] == undefined || forwardedBroadcast[temp] != seqnum)){
+	    if(deskey != selfKey){
+	    	if(forwardedBroadcast[temp] == undefined || forwardedBroadcast[temp] != seqnum){
 	        forwardedBroadcast[temp] = seqnum;
 	        client.setBroadcast(true);
-            let message = Buffer.from(`broadcastmessage: ${destKey} ${senderkey} ${seqnum} ${content}`);
+            let message = Buffer.from(`broadcastmessage: ${deskey} ${senderkey} ${seqnum} ${content}`);
             client.send(message, RCVPORT, broadcastAddr, (err) => {
                 if (err) {
                     console.error(`error occured while broadcasting:\n${err}`);
                 }
 
 	        });
+        }
 	    }else{
 	        //send to socket.io and show in chatroom
 	        if(keyMapsocketID[deskey] != undefined){
@@ -426,6 +438,9 @@
     		console.log(keyMapsocketID);
   		});
 		socket.emit('getUsername',me);
+		socket.on('sendBroadcast',function(msg){
+			sendMsgViaBroadcasting(msg.reciever,msg.content);
+		});
 		socket.on('msgfromclient',function(msg){
 			console.log(keymap[msg.reciever]);
 			sendMsgViaIP(msg.reciever,keymap[msg.reciever], msg.content);
