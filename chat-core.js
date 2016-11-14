@@ -86,13 +86,24 @@
 
 	// function section
 	function initialize() {
-	    require('dns').lookup(require('os').hostname(), (err, add, fam) => {
-	        HOST = add;
-	        console.log("HOST = " + HOST);
-	        server.bind(RCVPORT);
-	        generateKey();
-	        setBroadcastAddress();
-	    });
+	    // require('dns').lookup(require('os').hostname(), (err, add, fam) => {
+	    //     HOST = add;
+	    //     console.log("HOST = " + HOST);
+	    //     server.bind(RCVPORT);
+	    //     generateKey();
+	    //     setBroadcastAddress();
+	    // });
+	    var temp = ifaces['en0'];
+		if (!temp) {
+			temp = ifaces['Wi-Fi'];
+		}
+	    var address = temp[1].address;
+	    HOST = address;
+	    console.log("HOST = " + HOST);
+        server.bind(RCVPORT);
+        generateKey();
+        setBroadcastAddress();
+
 	    client.bind(SENDPORT,HOST,(err) => {
 	    	if(err){
 	    		console.error(`error occurred:\n${err}`);
@@ -125,12 +136,11 @@
 	}
 
 	function replyViaIP(destIP, msg) {
-		console.log("reply");
+		console.log("replyAnnoucement");
 		client.send(msg, RCVPORT, destIP, (err) => {
 	        if (err) {
 	            console.error(`error occured while announcing:\n${err}`);
 	        }
-	        console.log("ingingignigning");
 	    });
 	}
 
@@ -139,10 +149,7 @@
 	    // will send via broadcast if not receive ack in 1s
 	    console.log("send via ip "+ msg +" " + destKey);
 	    var seqnum = Math.floor((Math.random() * 1000000) + 1);
-	    console.log("sendMsgViaIP");
-	    console.log(msg+" "+destKey+" "+destIP);
-	    //client = dgram.createSocket('udp4');
-
+	 
 	    let message = Buffer.from(`message: ${destKey} ${selfKey} ${seqnum} ${msg}`);
 		client.send(message, RCVPORT, destIP, (err) => {
 		    if (err) {
@@ -183,17 +190,15 @@
 	    key = temp[1];
 	    ip = temp[0];
 	    displayname = temp[2];// map key to ip
-	    console.log(peers)
 	   	if(keymap[temp[1]] == undefined){
 	    	peers.push(temp[1]);
 	    	keymap[temp[1]] = temp[0];
 	    }
 
 	    // may want to broadcast to other known ip in case someone doesn't receive this
-	    console.log(forwardAnnouncement[key]);
 	    if(forwardAnnouncement[key] == undefined){
 	        forwardAnnouncement[key] = true;
-	        console.log('forward');
+	        console.log('forwardAnnouncement');
             let message = Buffer.from(`announce: ${ip} ${key} ${displayname}`);
             client.setBroadcast(true);
             client.send(message, RCVPORT, broadcastAddr, (err) => {
@@ -231,27 +236,19 @@
 	    	sender: senderkey,
 	    	content: content
 	    }
-	    console.log("receiveMsg");
-	    console.log(message);
 
-	    // if(selfKey == deskey){
 	    if(selfKey == deskey){
-	    	console.log("receiveMsgio");
-
 	    	//check that chatroom is opened?????
     		if(keyMapsocketID[senderkey] != undefined){
-    			console.log("already open page");
     			var socketID = keyMapsocketID[senderkey];
     			io.to(socketID).emit('msgtoClient',message);
     		}else{
-    		 	console.log("not open yet");
     		 	if(wmessage[senderkey] != undefined){
     		 	var temp = wmessage[senderkey];
     		 	}else{
     		 		var temp = [];
     		 	}
     		 	temp.push(message);
-    		 	console.log(temp);
     		 	wmessage[senderkey] = temp;
     		 	io.to(keyMapsocketID['list']).emit('notiOn',senderkey);
     		}
@@ -260,7 +257,6 @@
 			var temp = ""+senderkey+deskey;
 			if(forwardedMsg[temp] == undefined || forwardedMsg[temp] != seqnum ){
 				forwardedMsg[temp] = seqnum;
-	        	//keep ip or key
 	        	let message = Buffer.from(`message: ${deskey} ${senderkey} ${seqnum} ${content}`);
 	        	client.send(message, RCVPORT, keymap[deskey], (err) => {
 	            if (err) {
@@ -309,18 +305,15 @@
 	    }else{
 	        //send to socket.io and show in chatroom
 	        if(keyMapsocketID[deskey] != undefined){
-    			console.log("already open page");
     			var socketID = keyMapsocketID[senderkey];
     			io.to(socketID).emit('msgtoClient',message);
     		}else{
-    		 	console.log("not open yet");
     		 	if(wmessage[senderkey] != undefined){
     		 	var temp = wmessage[senderkey];
     		 	}else{
     		 		var temp = [];
     		 	}
     		 	temp.push(message);
-    		 	console.log(temp);
     		 	wmessage[senderkey] = temp;
     		 	io.to(keyMapsocketID['list']).emit('notiOn',senderkey);
     		}
@@ -331,7 +324,6 @@
 
 	function receiveReply(body) {
 		msg = body.trim().split(' ');
-		console.log(keymap[msg[1]]);
 		if(keymap[msg[1]] == undefined){
 			peers.push(msg[1]);
 			keymap[msg[1]] = msg[0];
@@ -342,7 +334,6 @@
 
 	}
 	function sendMsgAck(desIP,msg,seqnum){
-	        //keep ip or key
         let message = Buffer.from(`ackmessage: ${selfKey} ${seqnum} ${msg}`);
         client.send(message, RCVPORT, desIP, (err) => {
             if (err) {
@@ -413,7 +404,6 @@
 
 	app.post('/getUserlist', (req, res) => {
 	    res.sendFile(__dirname + '/friendlist.html');
-	    console.log("mimi = "+req.body.username);
 	    selfDisplay = req.body.username;
 	    announceSelf();
 	    me = selfKey;
@@ -421,7 +411,6 @@
 
 	app.get('/chatroom', (req, res) => {
 	    res.sendFile(__dirname + '/chatroom.html');
-	    console.log("inging = "+req.param('friend'));
 	    peer = req.param('friend');
 	});
 
@@ -434,18 +423,15 @@
 		console.log(socket.id);
 		socket.on('disconnect', function () {
 			console.log(socket.id + " disconnect");
-			console.log(keyMapsocketID);
 			for (var key in keyMapsocketID) {
         		if (keyMapsocketID[key] == socket.id) delete keyMapsocketID[key];
     		}
-    		console.log(keyMapsocketID);
   		});
 		socket.emit('getUsername',me);
 		socket.on('sendBroadcast',function(msg){
 			sendMsgViaBroadcasting(msg.reciever,msg.content);
 		});
 		socket.on('msgfromclient',function(msg){
-			console.log(keymap[msg.reciever]);
 			sendMsgViaIP(msg.reciever,keymap[msg.reciever], msg.content);
 		});
 		socket.on('reqGetUsername',function(){
@@ -461,7 +447,6 @@
 		});
 		socket.on('reqWaitingmsg',function(peer){
 			var temp = wmessage[peer];
-			console.log("temp "+temp);
 			if(temp != undefined){
 				for(var i = 0 ; i < temp.length ; i++){
 					io.to(keyMapsocketID[peer]).emit('waitingmsgtoClient',temp[i]);
@@ -473,8 +458,8 @@
 		socket.on('peerdisconnect',function(peer){
 			var index = peers.indexOf(peer);
 			if (index >= 0) {
-  			peers.splice( index, 1 );
-}
+  				peers.splice( index, 1 );
+			}
     		delete keymap[peer];
     		socket.emit('removepeerlist',peer);
 		});
