@@ -36,7 +36,7 @@
 	app.use( bodyParser.json() );       // to support JSON-encoded bodies
 	app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 	  extended: true
-	})); 
+	}));
 	app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css/'));
 	app.use('/socket', express.static(__dirname + '/node_modules/socket.io-client/'));
 	app.use('/', express.static(__dirname + '/node_modules/jquery/dist/'));
@@ -84,7 +84,7 @@
 	initialize();
 
 
-	// function section 
+	// function section
 	function initialize() {
 	    require('dns').lookup(require('os').hostname(), (err, add, fam) => {
 	        HOST = add;
@@ -148,7 +148,7 @@
 		    if (err) {
 		       	console.error(`error occured while announcing:\n${err}`);
 		    }
-			      
+
 		});
 		var temp = ""+selfKey+destKey;
 		forwardedMsg[temp]=seqnum;
@@ -161,7 +161,7 @@
 	    console.log("send broadcast "+ msg +" " + desKey);
 	    var seqnum = Math.floor((Math.random() * 1000000) + 1);
 	    client.setBroadcast(true);
-	    
+
         let message = Buffer.from(`broadcastmessage: ${desKey} ${selfKey} ${seqnum} ${msg}`);
         client.send(message, RCVPORT, broadcastAddr, (err) => {
             if (err) {
@@ -171,7 +171,7 @@
         });
         var temp = ""+selfKey+desKey;
 		forwardedBroadcast[temp]=seqnum;
-	  
+
 	}
 
 	//follow req, not test yet
@@ -193,7 +193,7 @@
 	    console.log(forwardAnnouncement[key]);
 	    if(forwardAnnouncement[key] == undefined){
 	        forwardAnnouncement[key] = true;
-	        console.log('forward');       
+	        console.log('forward');
             let message = Buffer.from(`announce: ${ip} ${key} ${displayname}`);
             client.setBroadcast(true);
             client.send(message, RCVPORT, broadcastAddr, (err) => {
@@ -202,7 +202,7 @@
                 }
 
             });
-	      
+
 	    }
 	    //this part reply back to the broadcaster about sel
 	    let repMsg = `reply: ${HOST} ${selfKey} ${selfDisplay}`;
@@ -266,11 +266,11 @@
 	            if (err) {
 	                console.error(`error occured while sending:\n${err}`);
 	            }
-	            
+
 	        	});
 			}
 		}
-	    
+
 	    // when receive message check if the msg is aim for us or should be forward
 	    // and remember to not forward more than once
 
@@ -378,7 +378,10 @@
 	//folow req, not test yet
 	function setBroadcastAddress() {
 	    // this function sets broadcast address using ip | (inverse(subnetmask))
-	    var temp = ifaces['Wi-Fi'];
+	    var temp = ifaces['en0'];
+		if (!temp) {
+			temp = ifaces['Wi-Fi'];
+		}
 	    var netmask = temp[1].netmask;
 	    var netmaskArray = netmask.split('.');
 	    var thisHost = HOST;
