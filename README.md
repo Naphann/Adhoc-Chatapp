@@ -22,3 +22,5 @@ to start the app
 ```
 node chat-core.js
 ```
+
+and navigate to localhost:3000
